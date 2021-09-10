@@ -8,3 +8,4 @@ Here a list of the contained tools:
 * **Locker**: check if another instance of the requested script is already running
 * **TorrentHandler**: send requests to the server that is controlling Transmission
 * **UploadDb**: store data to a text file as plaintext
+* **ApiHandler**: set of API used to communicate with IUB server
