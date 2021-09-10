@@ -8,8 +8,8 @@ class Locker:
 	"""
 	def __init__(self, name):
 		self.myFile = name
-		self.processes = self._get_other_processes()
 		self.myPid = os.getpid()
+		self.processes = self._get_other_processes()
 
 	def _get_other_processes(self):
 		processes = []
