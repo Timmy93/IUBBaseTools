@@ -1,4 +1,3 @@
-import os
 import yaml
 
 
@@ -26,14 +25,6 @@ class IUBConfiguration:
 				print("Cannot load file: [" + path + "] - Error: " + str(exc))
 				self.logging.error("Cannot load file: [" + path + "] - Error: " + str(exc))
 				exit()
-
-	@staticmethod
-	def create_absolute_path(path):
-		# Check if the given path is an absolute path
-		if not os.path.isabs(path):
-			current_dir = os.path.dirname(os.path.abspath(__file__))
-			path = os.path.join(current_dir, path)
-		return path
 
 	def set_config(self, section, name, newValue):
 		"""
