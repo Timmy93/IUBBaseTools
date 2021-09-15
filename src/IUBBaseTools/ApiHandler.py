@@ -46,8 +46,8 @@ class ApiHandler:
 		Request the available genres
 		:return: The list of active genres
 		"""
-		req = "generi"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req})
+		req = "getActiveGenre"
+		r = requests.post(self.apiSite+"/api/genre.php", data={'user': self.username, 'psw': self.token, 'req': req})
 		return json.loads(r.text)
 
 	def searchRelease(self, title):
@@ -56,43 +56,43 @@ class ApiHandler:
 		:param title: The title to search
 		:return:
 		"""
-		req = "search_titles"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req, 'title': title})
+		req = "searchTitles"
+		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req, 'title': title})
 		return json.loads(r.text)
 	
 	#Download a certain release
 	def downloadRelease(self, releaseId):
 		req = "download_tm"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req,  'code': releaseId})
+		r = requests.post(self.apiSite+"/api/download.php", data={'user': self.username, 'psw': self.token, 'req': req,  'code': releaseId})
 		return json.loads(r.text)
 	
 	#Array of IUB genres 
 	# 0	-> id
 	# 1	-> name
 	def getAllGenres(self):
-		req = "all_genres"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req})
+		req = "listAllGenre"
+		r = requests.post(self.apiSite+"/api/genre.php", data={'user': self.username, 'psw': self.token, 'req': req})
 		return self.decode(r)
 	
 	#Return the list of all releases to save
 	def getAllReleasesToSave(self):
 		self.logging.info('Requested all releases that need to be saved')
 		req = "get_all_releases_to_save"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req})
+		r = requests.post(self.apiSite+"/api/release_saver.php", data={'user': self.username, 'psw': self.token, 'req': req})
 		return self.decode(r)
 	
 	#Retrieve the list of all releases in a free 1fichier account from the server		
 	def getAllReleasesPerFreeAccount(self):
 		self.logging.info('Requested all releases with a free account')
 		req = "get_all_releases_per_account"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req})
+		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req})
 		return self.decode(r)
 	
 	#Retrieve the list of all materials having the given materials
 	def getAllReleases(self, genres):
 		self.logging.info("Request all releases present in the server")
 		req = "get_all_releases"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req, 'genres': json.dumps(genres)})
+		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req, 'genres': json.dumps(genres)})
 		return self.decode(r)
 		
 	#Creates the dictionaries
@@ -118,10 +118,11 @@ class ApiHandler:
 			self.logging.info("Account: "+account+" - To check "+str(now)+" releases")
 	
 	#Restore a single release
+	# TODO - Reimplement WAIT!!!
 	def restoreRelease(self, code):
 		self.logging.debug('Request restore: '+str(code))
 		req = "refresh_1f"
-		r = requests.post(self.apiSite+"/api.php", data={'code': code, 'user': self.username, 'psw': self.token, 'req': req})
+		r = requests.post(self.apiSite+"/api/release_refresher.php", data={'code': code, 'user': self.username, 'psw': self.token, 'req': req})
 		return self.decode(r)
 		
 	#Start restoring all until I can only wait
@@ -199,10 +200,9 @@ class ApiHandler:
 	def insertNewMaterial(self, type_file, number_files):
 		self.logging.info('Inserting: '+type_file)
 		req = "insert_new_material"
-				
 		#Send request
 		r = requests.post(
-			self.apiSite+"/api.php", 
+			self.apiSite+"/api/release.php",
 			data={
 				'user': self.username, 
 				'psw': self.token, 
@@ -225,6 +225,7 @@ class ApiHandler:
 			return 0
 
 	#Return the count of left objects
+	#TODO Migrate
 	def orderThisRelease(self, code):
 		self.logging.debug('Ordering: '+str(code))
 		req = "order_prem_dir_fichier"
@@ -234,21 +235,13 @@ class ApiHandler:
 	#Request the available genres
 	def saveRelease(self, code):
 		req = "save_release"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
-		return self.decode(r)
-	
-	#Request the creation of the full IUB DB
-	#TODO Function not implemented on server side
-	def dumpIubDb(self):
-		req = "create_dump"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req})
+		r = requests.post(self.apiSite+"/api/release_saver.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
 		return self.decode(r)
 
 	#Request to refresh the premium links inside the DB taking them from the directory
-	#TODO After release of new api - Point api to api/release.php
 	def refreshPremiumLinks(self, code):
 		req = "new_1f_links"
-		r = requests.post(self.apiSite+"/api.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
+		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
 		return self.decode(r)
 	
 	#Refresh torrent cache
