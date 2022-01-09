@@ -9,3 +9,12 @@ Here a list of the contained tools:
 * **TorrentHandler**: send requests to the server that is controlling Transmission
 * **UploadDb**: store data to a text file as plaintext
 * **ApiHandler**: set of API used to communicate with IUB server
+
+## Build guide
+To release a new build:
+1. Edit the `setup.cfg` file setting the correct version
+2. Open powershell to the root directory of this project
+3. Build the new version running `py -m build`
+4. Uploaded the new version to pypy `py -m twine upload dist/*`
+5. Set as username: `__token__`
+6. Set as password the saved token `pypi-xxx`
