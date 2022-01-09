@@ -79,7 +79,7 @@ class ApiHandler:
 		self.logging.info('Requested all releases that need to be saved')
 		req = "get_all_releases_to_save"
 		r = requests.post(self.apiSite+"/api/release_saver.php", data={'user': self.username, 'psw': self.token, 'req': req})
-		return self.decode(r)
+		return self.getParsedResponse(self.decode(r))
 	
 	#Retrieve the list of all releases in a free 1fichier account from the server		
 	def getAllReleasesPerFreeAccount(self):
@@ -235,7 +235,7 @@ class ApiHandler:
 	def saveRelease(self, code):
 		req = "save_release"
 		r = requests.post(self.apiSite+"/api/release_saver.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
-		return self.decode(r)
+		return self.getParsedResponse(self.decode(r))
 
 	#Request to refresh the premium links inside the DB taking them from the directory
 	def refreshPremiumLinks(self, code):
@@ -254,6 +254,15 @@ class ApiHandler:
 			return json.loads(r.text)
 		except ValueError as e:
 			self.logging.error("Cannot decode: " + r.text + "[" + str(e) + "]")
+			return r.text
+		except Exception as e:
+			self.logging.exception("JSON decode error [" + str(e) + "]")
+
+	def getParsedResponse(self, result):
+		try:
+			return json.loads(result['result'])
+		except ValueError as e:
+			self.logging.error("Cannot decode the result: " + result['result'] + "[" + str(e) + "]")
 			return r.text
 		except Exception as e:
 			self.logging.exception("JSON decode error [" + str(e) + "]")
