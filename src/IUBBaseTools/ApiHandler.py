@@ -48,7 +48,7 @@ class ApiHandler:
 		"""
 		req = "getActiveGenre"
 		r = requests.post(self.apiSite+"/api/genre.php", data={'user': self.username, 'psw': self.token, 'req': req})
-		return json.loads(r.text)
+		return self.getParsedResponse(r)
 
 	def searchRelease(self, title):
 		"""
@@ -58,13 +58,13 @@ class ApiHandler:
 		"""
 		req = "searchTitles"
 		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req, 'title': title})
-		return json.loads(r.text)
+		return self.getParsedResponse(r)
 	
 	#Download a certain release
 	def downloadRelease(self, releaseId):
 		req = "download_tm"
 		r = requests.post(self.apiSite+"/api/download.php", data={'user': self.username, 'psw': self.token, 'req': req,  'code': releaseId})
-		return json.loads(r.text)
+		return self.getParsedResponse(r)
 	
 	#Array of IUB genres 
 	# 0	-> id
@@ -72,28 +72,28 @@ class ApiHandler:
 	def getAllGenres(self):
 		req = "listAllGenre"
 		r = requests.post(self.apiSite+"/api/genre.php", data={'user': self.username, 'psw': self.token, 'req': req})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 	
 	#Return the list of all releases to save
 	def getAllReleasesToSave(self):
 		self.logging.info('Requested all releases that need to be saved')
 		req = "get_all_releases_to_save"
 		r = requests.post(self.apiSite+"/api/release_saver.php", data={'user': self.username, 'psw': self.token, 'req': req})
-		return self.getParsedResponse(self.decode(r))
+		return self.getParsedResponse(r)
 	
 	#Retrieve the list of all releases in a free 1fichier account from the server		
 	def getAllReleasesPerFreeAccount(self):
 		self.logging.info('Requested all releases with a free account')
 		req = "get_all_releases_per_account"
 		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 	
 	#Retrieve the list of all materials having the given materials
 	def getAllReleases(self, genres):
 		self.logging.info("Request all releases present in the server")
 		req = "get_all_releases"
 		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req, 'genres': json.dumps(genres)})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 		
 	#Creates the dictionaries
 	def manageReleases(self):
@@ -118,12 +118,11 @@ class ApiHandler:
 			self.logging.info("Account: "+account+" - To check "+str(now)+" releases")
 	
 	#Restore a single release
-	# TODO - Reimplement WAIT!!!
 	def restoreRelease(self, code):
 		self.logging.debug('Request restore: '+str(code))
 		req = "refresh_1f"
 		r = requests.post(self.apiSite+"/api/release_refresher.php", data={'code': code, 'user': self.username, 'psw': self.token, 'req': req})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 		
 	#Start restoring all until I can only wait
 	def restoreAll(self):
@@ -213,7 +212,7 @@ class ApiHandler:
 		)
 		#Control if the response is ok
 		try:
-			res = json.loads(r.text)
+			res = self.getParsedResponse(r)
 			print("Parsed json response: "+str(res))
 			if "upped" in res:
 				return int(res["upped"])
@@ -229,25 +228,25 @@ class ApiHandler:
 		self.logging.debug('Ordering: '+str(code))
 		req = "order_prem_dir_fichier"
 		r = requests.post(self.apiSite+"/api/release.php", data={'code': code, 'user': self.username, 'psw': self.token, 'req': req})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 	
 	#Request the available genres
 	def saveRelease(self, code):
 		req = "save_release"
 		r = requests.post(self.apiSite+"/api/release_saver.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
-		return self.getParsedResponse(self.decode(r))
+		return self.getParsedResponse(r)
 
 	#Request to refresh the premium links inside the DB taking them from the directory
 	def refreshPremiumLinks(self, code):
 		req = "new_1f_links"
 		r = requests.post(self.apiSite+"/api/release.php", data={'user': self.username, 'psw': self.token, 'req': req, 'code': code})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 	
 	#Refresh torrent cache
 	def refreshTorrentCache(self):
 		req = "icv_refresh_cache"
 		r = requests.post(self.apiSite+"/api/torrent.php", data={'user': self.username, 'psw': self.token, 'req': req})
-		return self.decode(r)
+		return self.getParsedResponse(r)
 			
 	def decode(self, r):
 		try:
@@ -259,6 +258,7 @@ class ApiHandler:
 			self.logging.exception("JSON decode error [" + str(e) + "]")
 
 	def getParsedResponse(self, result):
+		result = self.decode(result)
 		if type(result) is not dict:
 			self.logging.error("Expected a dict, obtained a " + type(result))
 			print("Expected a dict, obtained a " + type(result))
