@@ -259,13 +259,12 @@ class ApiHandler:
 			self.logging.exception("JSON decode error [" + str(e) + "]")
 
 	def getParsedResponse(self, result):
-		try:
-			return json.loads(result['result'])
-		except ValueError as e:
-			self.logging.error("Cannot decode the result: " + result['result'] + "[" + str(e) + "]")
-			return r.text
-		except Exception as e:
-			self.logging.exception("JSON decode error [" + str(e) + "]")
+		if type(result) is not dict:
+			self.logging.error("Expected a dict, obtained a " + type(result))
+			print("Expected a dict, obtained a " + type(result))
+			return result
+		else:
+			return result['result']
 
 
 class UnknownTypeFile(Exception):
