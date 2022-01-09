@@ -225,11 +225,10 @@ class ApiHandler:
 			return 0
 
 	#Return the count of left objects
-	#TODO Migrate
 	def orderThisRelease(self, code):
 		self.logging.debug('Ordering: '+str(code))
 		req = "order_prem_dir_fichier"
-		r = requests.post(self.apiSite+"/api.php", data={'code': code, 'user': self.username, 'psw': self.token, 'req': req})
+		r = requests.post(self.apiSite+"/api/release.php", data={'code': code, 'user': self.username, 'psw': self.token, 'req': req})
 		return self.decode(r)
 	
 	#Request the available genres
